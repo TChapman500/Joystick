@@ -98,7 +98,6 @@ bool IsXInputDevice(HANDLE device)
 struct params
 {
 	TChapman500::JoystickAPI::WinInputSystem *Self;
-	std::vector<TChapman500::JoystickAPI::DirectInputDevice *> &DeviceList;
 	std::vector<RAWINPUTDEVICELIST> &ControllerList;
 };
 
@@ -139,20 +138,19 @@ namespace TChapman500
 			{
 				// Is an XInput Device
 				if (IsXInputDevice(pParams->ControllerList[devIndex].hDevice))
-					pParams->DeviceList.push_back(new XInputDeviceEx(diDevice, pParams->ControllerList[devIndex].hDevice));
+					pParams->Self->DirectInputDeviceList.push_back(new XInputDeviceEx(diDevice, pParams->ControllerList[devIndex].hDevice));
 				// Not an XInput Device
-				else pParams->DeviceList.push_back(new DirectInputDevice(diDevice, pParams->ControllerList[devIndex].hDevice));
+				else pParams->Self->DirectInputDeviceList.push_back(new DirectInputDevice(diDevice, pParams->ControllerList[devIndex].hDevice));
 			}
 			// Not an XInputDevice
 			else
 			{
 				// Create interface and aquire the device
-				pParams->DeviceList.push_back(new DirectInputDevice(diDevice, pParams->ControllerList[devIndex].hDevice));
+				pParams->Self->DirectInputDeviceList.push_back(new DirectInputDevice(diDevice, pParams->ControllerList[devIndex].hDevice));
 			}
 
 
 			// Create interface and aquire the device
-			pParams->DeviceList.push_back(new DirectInputDevice(diDevice, pParams->ControllerList[devIndex].hDevice));
 			diDevice->Acquire();
 
 			devIndex++;
@@ -197,7 +195,6 @@ namespace TChapman500
 			std::vector<DirectInputDevice *> DeviceList;
 			params Params = {
 				this,
-				DeviceList,
 				controllerList
 			};
 
