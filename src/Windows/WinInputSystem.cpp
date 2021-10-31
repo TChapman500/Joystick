@@ -112,8 +112,6 @@ struct params
 {
 	TChapman500::JoystickAPI::WinInputSystem *Self;
 	std::vector<RAWINPUTDEVICELIST> &ControllerList;
-	unsigned MatchListSize;
-	bool *MatchList;
 };
 
 
@@ -230,15 +228,10 @@ namespace TChapman500
 				this,
 				controllerList
 			};
-			Params.MatchListSize = (unsigned)controllerList.size();
-			Params.MatchList = new bool[Params.MatchListSize];
-			for (unsigned i = 0; i < Params.MatchListSize; i++) Params.MatchList[i] = false;
 
 			// Initialize DirectInput
 			DirectInput8Create(GetModuleHandleA(nullptr), DIRECTINPUT_VERSION, IID_IDirectInput8A, (void **)&DirectInput, nullptr);
 			DirectInput->EnumDevices(DI8DEVCLASS_GAMECTRL, (LPDIENUMDEVICESCALLBACKA)&DIEnumDevicesCallback, &Params, DIEDFL_ALLDEVICES);
-
-			delete[] Params.MatchList;
 
 			unsigned xInputDevCount = 0;
 			// Determine which interface to use (XInput or DirectInput)
