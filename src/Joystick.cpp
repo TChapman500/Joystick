@@ -18,7 +18,7 @@ namespace TChapman500
 			VendorID = DeviceInterface->GetVendorID();
 			ProductID = DeviceInterface->GetProductID();
 			DeviceInterface->GetVendorName(VendorName);
-			DeviceInterface->GetProduceName(ProductName);
+			DeviceInterface->GetProductName(ProductName);
 			DeviceInterface->GetSerialNumber(SerialNumber);
 
 			// Initialize Buttons
@@ -78,6 +78,15 @@ namespace TChapman500
 		{
 			delete[] ButtonStates;
 			delete[] ValueStates;
+
+			for (unsigned i = 0; i < AxisList.size(); i++)
+				delete AxisList[i];
+
+			for (unsigned i = 0; i < ButtonList.size(); i++)
+				delete ButtonList[i];
+
+			for (unsigned i = 0; i < HATList.size(); i++)
+				delete HATList[i];
 		}
 
 		void Joystick::ReadJoystickState()
@@ -112,7 +121,7 @@ namespace TChapman500
 		unsigned short Joystick::GetVendorID() { return VendorID; }
 		unsigned short Joystick::GetProductID() { return ProductID; }
 		void Joystick::GetVendorName(wchar_t *str) { wcscpy_s(str, 126, VendorName); }
-		void Joystick::GetProduceName(wchar_t *str) { wcscpy_s(str, 126, ProductName); }
+		void Joystick::GetProductName(wchar_t *str) { wcscpy_s(str, 126, ProductName); }
 		void Joystick::GetSerialNumber(wchar_t *str) { wcscpy_s(str, 126, SerialNumber); }
 
 	}

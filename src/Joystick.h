@@ -28,7 +28,7 @@ namespace TChapman500
 			unsigned short GetProductID();
 
 			void GetVendorName(wchar_t *str);
-			void GetProduceName(wchar_t *str);
+			void GetProductName(wchar_t *str);
 			void GetSerialNumber(wchar_t *str);
 
 

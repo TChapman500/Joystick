@@ -41,7 +41,7 @@ namespace TChapman500
 			GetFloatValues(0, 255, vStates[4].RawValue, &vStates[4].CenterRelative, &vStates[4].EndRelative);
 
 			// Right Trigger
-			vStates[5].RawValue = devState.Gamepad.bLeftTrigger;
+			vStates[5].RawValue = devState.Gamepad.bRightTrigger;
 			GetFloatValues(0, 255, vStates[5].RawValue, &vStates[5].CenterRelative, &vStates[5].EndRelative);
 
 			// DPad UP

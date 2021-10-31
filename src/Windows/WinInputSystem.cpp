@@ -9,6 +9,7 @@
 #include <hidsdi.h>
 #include <hidpi.h>
 #include <Xinput.h>
+#include <wctype.h>
 
 bool IsXInputDevice(HANDLE device)
 {
@@ -29,14 +30,23 @@ bool IsXInputDevice(HANDLE device)
 	UINT dataSize = 0;
 	GetRawInputDeviceInfoA(device, RIDI_PREPARSEDDATA, nullptr, &dataSize);
 	_HIDP_PREPARSED_DATA *preparsed = (_HIDP_PREPARSED_DATA *)new char[dataSize];
+	ZeroMemory(preparsed, dataSize);
 	GetRawInputDeviceInfoA(device, RIDI_PREPARSEDDATA, preparsed, &dataSize);
 
 	// Device Capabilities
 	HIDP_CAPS caps;
-	HidP_GetCaps(preparsed, &caps);
+	NTSTATUS ignore = HidP_GetCaps(preparsed, &caps);
+	if (ignore);	// This is just to trick Visual Studio
+
+	std::vector<HIDP_BUTTON_CAPS> buttonList;
+	buttonList.resize(caps.NumberInputButtonCaps);
+	ignore = HidP_GetButtonCaps(HidP_Input, buttonList.data(), &caps.NumberInputButtonCaps, preparsed);
+	if (ignore);
+
+	int buttonCount = buttonList[0].Range.UsageMax - buttonList[0].Range.UsageMin + 1;
 
 	// Verify via button and axis count.
-	bool buttonCountMatch = caps.NumberInputButtonCaps == 10;
+	bool buttonCountMatch = buttonCount == 10;
 	bool valueCountMatch = caps.NumberInputValueCaps == 6;
 	if (!(buttonCountMatch || valueCountMatch))
 	{
@@ -47,7 +57,8 @@ bool IsXInputDevice(HANDLE device)
 	// Verify via axis parameters.
 	std::vector<HIDP_VALUE_CAPS> axisList;
 	axisList.resize(caps.NumberInputValueCaps);
-	HidP_GetValueCaps(HidP_Input, axisList.data(), &caps.NumberInputValueCaps, preparsed);
+	ignore = HidP_GetValueCaps(HidP_Input, axisList.data(), &caps.NumberInputValueCaps, preparsed);
+	if (ignore);
 
 	auto verifyAxis = [](HIDP_VALUE_CAPS *axis, USAGE targetUsage) -> bool
 	{
@@ -60,22 +71,22 @@ bool IsXInputDevice(HANDLE device)
 		return true;
 	};
 	
-	if (!verifyAxis(&axisList[0], 0x30))
+	if (!verifyAxis(&axisList[0], 0x31))
 	{
 		delete[] preparsed;
 		return false;
 	}
-	if (!verifyAxis(&axisList[1], 0x31))
+	if (!verifyAxis(&axisList[1], 0x30))
 	{
 		delete[] preparsed;
 		return false;
 	}
-	if (!verifyAxis(&axisList[2], 0x33))
+	if (!verifyAxis(&axisList[2], 0x34))
 	{
 		delete[] preparsed;
 		return false;
 	}
-	if (!verifyAxis(&axisList[3], 0x34))
+	if (!verifyAxis(&axisList[3], 0x33))
 	{
 		delete[] preparsed;
 		return false;
@@ -87,28 +98,31 @@ bool IsXInputDevice(HANDLE device)
 	}
 
 	// Verify HAT Switch
-	if (axisList[6].Range.UsageMin != 0x39) return false;
+	if (axisList[5].Range.UsageMin != 0x39)
+	{
+		delete[] preparsed;
+		return false;
+	}
 
 	delete[] preparsed;
 	return true;
 }
 
-
-
 struct params
 {
 	TChapman500::JoystickAPI::WinInputSystem *Self;
 	std::vector<RAWINPUTDEVICELIST> &ControllerList;
+	unsigned MatchListSize;
+	bool *MatchList;
 };
 
-unsigned devIndex = 0;
 
 
 namespace TChapman500
 {
 	namespace JoystickAPI
 	{
-		BOOL WinInputSystem::DIEnumDevicesCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
+		BOOL WinInputSystem::DIEnumDevicesCallback(LPCDIDEVICEINSTANCEA lpddi, LPVOID pvRef)
 		{
 			// Initialize Device Instance
 			params *pParams = (params *)pvRef;
@@ -126,12 +140,37 @@ namespace TChapman500
 			calMode.dwData = DIPROPCALIBRATIONMODE_RAW;
 			diDevice->SetProperty(DIPROP_CALIBRATIONMODE, (DIPROPHEADER *)&calMode);
 
-			// Check to see if we should create an XInputDeviceEx object
-			// Get information about the current device.
-			unsigned size = sizeof(RID_DEVICE_INFO);
+
+			DIPROPGUIDANDPATH devHIDPath;
+			ZeroMemory(&devHIDPath, sizeof(DIPROPGUIDANDPATH));
+			devHIDPath.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+			devHIDPath.diph.dwSize = sizeof(DIPROPGUIDANDPATH);
+			devHIDPath.diph.dwObj = 0;
+			devHIDPath.diph.dwHow = DIPH_DEVICE;
+			diDevice->GetProperty(DIPROP_GUIDANDPATH, (DIPROPHEADER*)&devHIDPath);
+
 			RID_DEVICE_INFO devInfo;
 			ZeroMemory(&devInfo, sizeof(RID_DEVICE_INFO));
-			GetRawInputDeviceInfoA(pParams->ControllerList[devIndex].hDevice, RIDI_DEVICEINFO, &devInfo, &size);
+
+			// Get the device that matches the attributes
+			unsigned devIndex = 0;
+			for (unsigned i = 0; i < pParams->ControllerList.size(); i++)
+			{
+				unsigned size = sizeof(RID_DEVICE_INFO);
+				GetRawInputDeviceInfoA(pParams->ControllerList[i].hDevice, RIDI_DEVICEINFO, &devInfo, &size);
+
+				UINT dataSize = 260;
+				wchar_t devName[260];
+				ZeroMemory(devName, sizeof(wchar_t) * 260);
+				GetRawInputDeviceInfoW(pParams->ControllerList[i].hDevice, RIDI_DEVICENAME, devName, &dataSize);
+
+				for (unsigned i = 0; i < 260; i++) devName[i] = towlower(devName[i]);
+				if (wcsncmp(devName, devHIDPath.wszPath, 260) == 0)
+				{
+					devIndex = i;
+					break;
+				}
+			}
 
 			// Possible XInputDevice
 			if (devInfo.hid.usUsage == 5)
@@ -149,11 +188,6 @@ namespace TChapman500
 				pParams->Self->DirectInputDeviceList.push_back(new DirectInputDevice(diDevice, pParams->ControllerList[devIndex].hDevice));
 			}
 
-
-			// Create interface and aquire the device
-			diDevice->Acquire();
-
-			devIndex++;
 			return DIENUM_CONTINUE;
 		}
 
@@ -162,7 +196,6 @@ namespace TChapman500
 #pragma warning(disable:6385)
 		WinInputSystem::WinInputSystem()
 		{
-			devIndex = 0;
 
 			// Initialize Raw Input
 			GetRawInputDeviceList(nullptr, &RAWInputCount, sizeof(RAWINPUTDEVICELIST));
@@ -197,21 +230,25 @@ namespace TChapman500
 				this,
 				controllerList
 			};
+			Params.MatchListSize = (unsigned)controllerList.size();
+			Params.MatchList = new bool[Params.MatchListSize];
+			for (unsigned i = 0; i < Params.MatchListSize; i++) Params.MatchList[i] = false;
 
 			// Initialize DirectInput
 			DirectInput8Create(GetModuleHandleA(nullptr), DIRECTINPUT_VERSION, IID_IDirectInput8A, (void **)&DirectInput, nullptr);
 			DirectInput->EnumDevices(DI8DEVCLASS_GAMECTRL, (LPDIENUMDEVICESCALLBACKA)&DIEnumDevicesCallback, &Params, DIEDFL_ALLDEVICES);
 
+			delete[] Params.MatchList;
 
 			unsigned xInputDevCount = 0;
 			// Determine which interface to use (XInput or DirectInput)
-			for (unsigned i = 0; i < RAWInputCount; i++)
+			for (unsigned i = 0; i < DirectInputDeviceList.size(); i++)
 			{
-				if (IsXInputDevice(controllerList[i].hDevice))
+				if (IsXInputDevice(DirectInputDeviceList[i]->GetDeviceHandle()))
 				{
 					if (xInputDevCount < 4)
 					{
-						XInputDevice *newInterface = new XInputDevice(xInputDevCount, controllerList[i].hDevice);
+						XInputDevice *newInterface = new XInputDevice(xInputDevCount, DirectInputDeviceList[i]->GetDeviceHandle());
 						XInputDeviceList.push_back(newInterface);
 						JoystickList.push_back(new Joystick(newInterface));
 					}

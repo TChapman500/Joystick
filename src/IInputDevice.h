@@ -36,7 +36,7 @@ namespace TChapman500
 			virtual unsigned short GetProductID() = 0;
 
 			virtual void GetVendorName(wchar_t *str) = 0;
-			virtual void GetProduceName(wchar_t *str) = 0;
+			virtual void GetProductName(wchar_t *str) = 0;
 			virtual void GetSerialNumber(wchar_t *str) = 0;
 
 			virtual void ReadInputStates(bool *bStates, valueState *vStates) = 0;

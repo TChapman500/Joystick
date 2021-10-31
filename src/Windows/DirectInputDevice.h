@@ -1,5 +1,6 @@
 #pragma once
 #include "WinInputDevice.h"
+#include <hidsdi.h>
 #include <dinput.h>
 #include <vector>
 
@@ -21,25 +22,31 @@ namespace TChapman500
 
 
 			virtual void GetInterfaceName(char *str) override;
+
 		private:
 			IDirectInputDevice8A *Device;	// Initialized
-			DIDEVCAPS Capabilities;		// Initialized
+			HIDP_CAPS Capabilities;		// Initialized
 			DIDATAFORMAT ReportFormat;
+			_HIDP_PREPARSED_DATA *Preparsed;
 			int ReportSize;
 			char *ReportData;
 
+			unsigned short BtnUsagePage;
+			unsigned short BtnUsageMin;
+			unsigned short BtnUsageMax;
+			unsigned ButtonCount;
 
 			struct dInputObject
 			{
+
 				DIDEVICEOBJECTINSTANCEA ControlInstance;
 				DIPROPRANGE ControlRange;
 			};
-			std::vector<dInputObject *> AxisList;
-			std::vector<dInputObject *> ButtonList;
 			std::vector<dInputObject *> ForceFeedbackList;
 
 			std::vector<valueProperties> ValueProperties;
 
+			OVERLAPPED OverlappedResult;
 
 
 			static BOOL DIEnumValueObjectsCallback(LPCDIDEVICEOBJECTINSTANCEA lpddoi, LPVOID pvRef);

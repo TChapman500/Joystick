@@ -18,10 +18,11 @@ namespace TChapman500
 			virtual unsigned short GetProductID() override;
 
 			virtual void GetVendorName(wchar_t *str) override;
-			virtual void GetProduceName(wchar_t *str) override;
+			virtual void GetProductName(wchar_t *str) override;
 			virtual void GetSerialNumber(wchar_t *str) override;
 
-
+			HANDLE GetDeviceHandle();
+			
 		protected:
 			HANDLE DeviceHandle;
 			HANDLE HIDHandle;

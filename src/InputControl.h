@@ -12,7 +12,6 @@ namespace TChapman500
 
 			virtual void SetState(void *state) = 0;
 			
-		private:
 			unsigned short UsagePage;
 			unsigned short Usage;
 		};

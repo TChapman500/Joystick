@@ -26,12 +26,15 @@ namespace TChapman500
 			unsigned RAWInputCount = 0;
 			unsigned DirectInputCount = 0;
 
+			
+
+
 			std::vector<XInputDevice *> XInputDeviceList;			// Max of 4 entries
 			std::vector<DirectInputDevice *> DirectInputDeviceList;		// Variable number of entries
 			std::vector<Joystick *> JoystickList;		// All devices found
 
 			IDirectInput8A *DirectInput;
-			static BOOL DIEnumDevicesCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef);
+			static BOOL DIEnumDevicesCallback(LPCDIDEVICEINSTANCEA lpddi, LPVOID pvRef);
 
 		};
 	}

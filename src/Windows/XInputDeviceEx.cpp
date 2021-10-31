@@ -33,10 +33,10 @@ namespace TChapman500
 		unsigned XInputDeviceEx::GetValueCount() { return 6; }
 
 		valueProperties ValuePropertiesEx[6] = {
-			{ 1, 0x30, 8, false, 0, 255 },	// X
-			{ 1, 0x31, 8, false, 0, 255 },	// Y
-			{ 1, 0x33, 8, false, 0, 255 },	// Rx
-			{ 1, 0x34, 8, false, 0, 255 },	// Ry
+			{ 1, 0x31, 8, false, 0, 255 },	// X
+			{ 1, 0x30, 8, false, 0, 255 },	// Y
+			{ 1, 0x34, 8, false, 0, 255 },	// Rx
+			{ 1, 0x33, 8, false, 0, 255 },	// Ry
 			{ 1, 0x32, 8, false, 0, 255 },	// Z
 			{ 1, 0x39, 4, true,  0, 7 }	// PoV
 		};

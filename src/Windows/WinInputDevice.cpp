@@ -22,12 +22,14 @@ namespace TChapman500
 			ProductID = (unsigned short)devInfo.hid.dwProductId;
 
 			// Get device name
-			UINT dataSize = 0;
-			GetRawInputDeviceInfoA(DeviceHandle, RIDI_DEVICENAME, nullptr, &dataSize);
-			char *devName = new char[dataSize];
-			GetRawInputDeviceInfoA(DeviceHandle, RIDI_DEVICENAME, devName, &dataSize);
+			UINT dataSize = 260;
+			GetRawInputDeviceInfoW(DeviceHandle, RIDI_DEVICENAME, nullptr, &dataSize);
+			wchar_t *devName = new wchar_t[dataSize];
+			ZeroMemory(devName, sizeof(wchar_t) * dataSize);
+			GetRawInputDeviceInfoW(DeviceHandle, RIDI_DEVICENAME, devName, &dataSize);
 
-			HIDHandle = CreateFileA(devName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
+			HIDHandle = CreateFileW(devName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
+			delete[] devName;
 			if (HIDHandle)
 			{
 				HidD_GetManufacturerString(HIDHandle, VendorName, sizeof(wchar_t) * 126);
@@ -46,7 +48,8 @@ namespace TChapman500
 		unsigned short WinInputDevice::GetVendorID() { return VendorID; }
 		unsigned short WinInputDevice::GetProductID() { return ProductID; }
 		void WinInputDevice::GetVendorName(wchar_t *str) { wcscpy_s(str, 126, VendorName); }
-		void WinInputDevice::GetProduceName(wchar_t *str) { wcscpy_s(str, 126, ProductName); }
+		void WinInputDevice::GetProductName(wchar_t *str) { wcscpy_s(str, 126, ProductName); }
 		void WinInputDevice::GetSerialNumber(wchar_t *str) { wcscpy_s(str, 126, SerialNumber); }
+		HANDLE WinInputDevice::GetDeviceHandle() { return DeviceHandle; }
 	}
 }
