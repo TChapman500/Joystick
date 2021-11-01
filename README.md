@@ -1,5 +1,5 @@
 # Joystick
-This is supposed to be a cross-platform Joystick library, but for now, it's just for windows.  Forks are pull requests to improve this library are welcome.
+This is supposed to be a cross-platform Joystick library, but for now, it's just for windows.  Forks are pull requests to improve this library are welcome.  I have made a simple [Joystick Viewer](https://github.com/TChapman500/WindowsJoystick) for testing this library.  Just don't hit the refresh button.
 
 ## Use in Projects
 For each platform, you should only need to download the platform-specific static library, and the `InputSystem.h`, `IInputSystem.h`, `Joystick.h`, `InputButton.h`, `InputAxis.h`, and `InputHAT.h` files.  To initialize the input system, call `TChapman500::JoystickAPI::CreateInputSystem()`, and then call `TChapman500::JoystickAPI::DestroyInputSystem()` to deallocate the memory.
