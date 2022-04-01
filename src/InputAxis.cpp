@@ -18,10 +18,14 @@ namespace TChapman500
 
 		void InputAxis::SetState(void *state)
 		{
+			// Return early if no state data is given.
+			if (!state) return;
+
+			// Process state data
 			valueState *vState = (valueState *)state;
-			RawValue = vState->RawValue;
-			CenterRelative = vState->CenterRelative;
-			EndRelative = vState->EndRelative;
+			RawValue = vState->RawValue;			// Integer value
+			CenterRelative = vState->CenterRelative;	// Floating point value (from -1 to +1, 0 = center)
+			EndRelative = vState->EndRelative;		// Floating point value (from 0 to +1, 0.5 = center)
 		}
 	}
 }

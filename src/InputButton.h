@@ -14,10 +14,20 @@ namespace TChapman500
 
 			virtual void SetState(void *state) override;
 
+			/// <summary>
+			/// Whether the button is currently pressed.
+			/// </summary>
 			bool IsPressed = false;
-			bool RisingEdge = false;
-			bool FallingEdge = false;
 
+			/// <summary>
+			/// Whether the button was pressed this frame.
+			/// </summary>
+			bool RisingEdge = false;
+
+			/// <summary>
+			/// Whether the button was released this frame.
+			/// </summary>
+			bool FallingEdge = false;
 		};
 	}
 }

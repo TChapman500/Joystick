@@ -9,6 +9,10 @@ namespace TChapman500
 		{
 			DeviceHandle = devHandle;
 
+			ZeroMemory(VendorName, sizeof(wchar_t) * 126);
+			ZeroMemory(ProductName, sizeof(wchar_t) * 126);
+			ZeroMemory(SerialNumber, sizeof(wchar_t) * 126);
+
 			// Get information about the current device.
 			unsigned size = sizeof(RID_DEVICE_INFO);
 			RID_DEVICE_INFO devInfo;
@@ -32,9 +36,14 @@ namespace TChapman500
 			delete[] devName;
 			if (HIDHandle)
 			{
-				HidD_GetManufacturerString(HIDHandle, VendorName, sizeof(wchar_t) * 126);
-				HidD_GetProductString(HIDHandle, ProductName, sizeof(wchar_t) * 126);
-				HidD_GetSerialNumberString(HIDHandle, SerialNumber, sizeof(wchar_t) * 126);
+				BOOLEAN result = HidD_GetManufacturerString(HIDHandle, VendorName, sizeof(wchar_t) * 126);
+				if (!result) ZeroMemory(VendorName, sizeof(wchar_t) * 126);
+
+				result = HidD_GetProductString(HIDHandle, ProductName, sizeof(wchar_t) * 126);
+				if (!result) ZeroMemory(ProductName, sizeof(wchar_t) * 126);
+
+				result = HidD_GetSerialNumberString(HIDHandle, SerialNumber, sizeof(wchar_t) * 126);
+				if (!result) ZeroMemory(SerialNumber, sizeof(wchar_t) * 126);
 			}
 		}
 

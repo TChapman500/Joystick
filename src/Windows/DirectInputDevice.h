@@ -35,6 +35,7 @@ namespace TChapman500
 			unsigned short BtnUsageMin;
 			unsigned short BtnUsageMax;
 			unsigned ButtonCount;
+			unsigned OutButtonCount;
 
 			struct dInputObject
 			{
@@ -47,10 +48,8 @@ namespace TChapman500
 			std::vector<valueProperties> ValueProperties;
 
 			OVERLAPPED OverlappedResult;
+			USAGE *ButtonStates;
 
-
-			static BOOL DIEnumValueObjectsCallback(LPCDIDEVICEOBJECTINSTANCEA lpddoi, LPVOID pvRef);
-			static BOOL DIEnumButtonObjectsCallback(LPCDIDEVICEOBJECTINSTANCEA lpddoi, LPVOID pvRef);
 			static BOOL DIEnumFFBObjectsCallback(LPCDIDEVICEOBJECTINSTANCEA lpddoi, LPVOID pvRef);
 		};
 	}

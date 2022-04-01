@@ -35,13 +35,11 @@ bool IsXInputDevice(HANDLE device)
 
 	// Device Capabilities
 	HIDP_CAPS caps;
-	NTSTATUS ignore = HidP_GetCaps(preparsed, &caps);
-	if (ignore);	// This is just to trick Visual Studio
+	HidP_GetCaps(preparsed, &caps);
 
 	std::vector<HIDP_BUTTON_CAPS> buttonList;
 	buttonList.resize(caps.NumberInputButtonCaps);
-	ignore = HidP_GetButtonCaps(HidP_Input, buttonList.data(), &caps.NumberInputButtonCaps, preparsed);
-	if (ignore);
+	HidP_GetButtonCaps(HidP_Input, buttonList.data(), &caps.NumberInputButtonCaps, preparsed);
 
 	int buttonCount = buttonList[0].Range.UsageMax - buttonList[0].Range.UsageMin + 1;
 
@@ -50,15 +48,14 @@ bool IsXInputDevice(HANDLE device)
 	bool valueCountMatch = caps.NumberInputValueCaps == 6;
 	if (!(buttonCountMatch || valueCountMatch))
 	{
-		delete[] preparsed;
+		delete[] (char *)preparsed;
 		return false;
 	}
 
 	// Verify via axis parameters.
 	std::vector<HIDP_VALUE_CAPS> axisList;
 	axisList.resize(caps.NumberInputValueCaps);
-	ignore = HidP_GetValueCaps(HidP_Input, axisList.data(), &caps.NumberInputValueCaps, preparsed);
-	if (ignore);
+	HidP_GetValueCaps(HidP_Input, axisList.data(), &caps.NumberInputValueCaps, preparsed);
 
 	auto verifyAxis = [](HIDP_VALUE_CAPS *axis, USAGE targetUsage) -> bool
 	{
@@ -73,38 +70,38 @@ bool IsXInputDevice(HANDLE device)
 	
 	if (!verifyAxis(&axisList[0], 0x31))
 	{
-		delete[] preparsed;
+		delete[] (char *)preparsed;
 		return false;
 	}
 	if (!verifyAxis(&axisList[1], 0x30))
 	{
-		delete[] preparsed;
+		delete[] (char *)preparsed;
 		return false;
 	}
 	if (!verifyAxis(&axisList[2], 0x34))
 	{
-		delete[] preparsed;
+		delete[] (char *)preparsed;
 		return false;
 	}
 	if (!verifyAxis(&axisList[3], 0x33))
 	{
-		delete[] preparsed;
+		delete[] (char *)preparsed;
 		return false;
 	}
 	if (!verifyAxis(&axisList[4], 0x32))
 	{
-		delete[] preparsed;
+		delete[] (char *)preparsed;
 		return false;
 	}
 
 	// Verify HAT Switch
 	if (axisList[5].Range.UsageMin != 0x39)
 	{
-		delete[] preparsed;
+		delete[] (char *)preparsed;
 		return false;
 	}
 
-	delete[] preparsed;
+	delete[] (char *)preparsed;
 	return true;
 }
 
@@ -204,8 +201,7 @@ namespace TChapman500
 			std::vector<RAWINPUTDEVICELIST> controllerList;
 			for (unsigned i = 0; i < RAWInputCount; i++)
 			{
-				// Device is not a keyboard or mouse
-				if (devList[i].dwType == RIM_TYPEHID)
+				if (devList[i].dwType)
 				{
 					// Get information about the current device.
 					unsigned size = sizeof(RID_DEVICE_INFO);
