@@ -2,7 +2,7 @@
 
 namespace TChapman500
 {
-	namespace JoystickAPI
+	namespace Input
 	{
 		InputButton::InputButton(unsigned short usagePage, unsigned short usage) : InputControl(usagePage, usage) {}
 		InputButton::~InputButton() {}

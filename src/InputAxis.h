@@ -1,14 +1,14 @@
 #pragma once
-#include "InputControl.h"
+#include "InputValue.h"
 
 namespace TChapman500
 {
-	namespace JoystickAPI
+	namespace Input
 	{
-		class InputAxis : public InputControl
+		class InputAxis : public InputValue
 		{
 		public:
-			InputAxis(unsigned short usagePage, unsigned short usage, unsigned short bits, int minValue, int maxValue);
+			InputAxis(unsigned short usagePage, unsigned short usage, unsigned short bits, int min, int max, bool null);
 			~InputAxis();
 
 			void SetState(void *state) override;
@@ -28,15 +28,6 @@ namespace TChapman500
 			/// </summary>
 			float EndRelative = 0.0f;
 
-			/// <summary>
-			/// The raw value retrieved from the device.  The direct use of this value is
-			/// not recommended.  Use the CenterRelative and EndRelative values instead.
-			/// </summary>
-			int RawValue = 0;
-			
-			int MinValue;
-			int MaxValue;
-			unsigned short BitSize;
 		};
 	}
 }

@@ -3,7 +3,7 @@
 
 namespace TChapman500
 {
-	namespace JoystickAPI
+	namespace Input
 	{
 		class CustomHAT : public InputHAT
 		{

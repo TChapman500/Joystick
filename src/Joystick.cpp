@@ -3,126 +3,214 @@
 #include "InputAxis.h"
 #include "InputHAT.h"
 #include "CustomHAT.h"
+#include "IInput.h"
+#include "IOutput.h"
+#include <string>
+#include <vector>
 
-namespace TChapman500
+namespace TChapman500 {
+namespace Input {
+
+Joystick::Joystick(IInput *inputInterface, IOutput *outputInterface)
 {
-	namespace JoystickAPI
+	InputInterface = inputInterface;
+	OutputInterface = outputInterface;
+
+	std::vector<InputButton *> tempButtonList;
+	std::vector<InputAxis *> tempAxisList;
+	std::vector<InputHAT *> tempHATList;
+
+	// Initialize Buttons
+	_RealButtonCount = inputInterface->GetButtonCount();
+	_RawButtonStates = new bool[_RealButtonCount];
+	for (size_t i = 0; i < _RealButtonCount; i++)
+		tempButtonList.push_back(new InputButton(9, (unsigned short)(i + 1)));
+
+	// Initialize values
+	_ValueListSize = inputInterface->GetValueCount();
+	_RawValueStates = new unsigned[_ValueListSize];
+	_ValueList = new InputValue*[_ValueListSize];
+
+	value_properties valueProps;
+	for (size_t i = 0; i < _ValueListSize; i++)
 	{
-		Joystick::Joystick(IInputDevice *devInterface)
+		InputInterface->GetValueProperties((unsigned)i, &valueProps);
+		
+		// This is a HAT Switch
+		if (valueProps.UsagePage == 0x01 && valueProps.Usage == 0x39)
 		{
-			DeviceInterface = devInterface;
+			InputButton *buttonList[4];
+			InputHAT *newHat = new InputHAT(valueProps.UsagePage, valueProps.Usage, valueProps.Bits, valueProps.MinValue, valueProps.MaxValue, valueProps.HasNullState, buttonList);
+			_ValueList[i] = newHat;
 
-			// Get Joystick Information
-			UsagePage = DeviceInterface->GetUsagePage();
-			Usage = DeviceInterface->GetUsage();
-			VendorID = DeviceInterface->GetVendorID();
-			ProductID = DeviceInterface->GetProductID();
-			DeviceInterface->GetVendorName(VendorName);
-			DeviceInterface->GetProductName(ProductName);
-			DeviceInterface->GetSerialNumber(SerialNumber);
+			// Get the HAT Switch and it's buttons.
+			tempHATList.push_back(newHat);
+			tempButtonList.push_back(buttonList[0]);
+			tempButtonList.push_back(buttonList[1]);
+			tempButtonList.push_back(buttonList[2]);
+			tempButtonList.push_back(buttonList[3]);
+		}
+		// This is an axis
+		else
+		{
+			// Add new axis to the hidden axis list.
+			InputAxis *newAxis = new InputAxis(valueProps.UsagePage, valueProps.Usage, valueProps.Bits, valueProps.MinValue, valueProps.MaxValue, valueProps.HasNullState);
+			_ValueList[i] = newAxis;
 
-			// Initialize Buttons
-			_RealButtonCount = DeviceInterface->GetButtonCount();
-			ButtonStates = new bool[_RealButtonCount];
-			for (unsigned i = 0; i < _RealButtonCount; i++)
-				ButtonList.push_back(new InputButton(9, i));
-
-			// Initialize values
-			_ValueCount = DeviceInterface->GetValueCount();
-			ValueStates = new valueState[_ValueCount];
-
-			unsigned currAxis = 0;
-			unsigned currHAT = 0;
-
-			valueProperties valueProps;
-
-			for (unsigned i = 0; i < _ValueCount; i++)
+			// We'll use this to determine which axis to expose to the user.
+			switch (valueProps.UsagePage)
 			{
-				DeviceInterface->GetValueProperties(i, &valueProps);
-				ValuePropertyList.push_back(valueProps);
-
-				valueStateFunctions function;
-
-				// This is a HAT Switch
-				if (valueProps.Usage == 0x39)
-				{
-					_RealHATCount++;
-
-					// Get the HAT Switch and it's buttons.
-					InputButton **buttonList = new InputButton*[4];
-					HATList.push_back(new InputHAT(valueProps.UsagePage, valueProps.Usage, buttonList));
-					ButtonList.push_back(buttonList[0]);
-					ButtonList.push_back(buttonList[1]);
-					ButtonList.push_back(buttonList[2]);
-					ButtonList.push_back(buttonList[3]);
-					delete[] buttonList;
-
-					function.Index = currHAT;
-					function.Function = &Joystick::_SetHatState;
-					_SetValueFunctions.push_back(function);
-					currHAT++;
-				}
-				// This is an axis
-				else
-				{
-					AxisList.push_back(new InputAxis(valueProps.UsagePage, valueProps.Usage, valueProps.Bits, valueProps.MinValue, valueProps.MaxValue));
-					function.Index = currAxis;
-					function.Function = &Joystick::_SetAxisState;
-					_SetValueFunctions.push_back(function);
-					currAxis++;
-				}
+			case 0x01:	// Generic Desktop
+				if ((valueProps.Usage >= 0x30 && valueProps.Usage <= 0x38) || (valueProps.Usage >= 0x40 && valueProps.Usage <= 0x46) || (valueProps.Usage >= 0x49 && valueProps.Usage <= 0x4C))
+					tempAxisList.push_back(newAxis);
+				break;
+			case 0x02:	// Simulation Controls
+				if ((valueProps.Usage >= 0xB0 && valueProps.Usage <= 0xB2) || (valueProps.Usage >= 0xB5 && valueProps.Usage <= 0xB6) || valueProps.Usage == 0xBF || (valueProps.Usage >= 0xC3 && valueProps.Usage <= 0xD0))
+					tempAxisList.push_back(newAxis);
+				break;
+			case 0x05:	// Game Controls
+				if (valueProps.Usage >= 0x21 && valueProps.Usage <= 0x29)
+					tempAxisList.push_back(newAxis);
+				break;
 			}
 		}
+	}
 
-		Joystick::~Joystick()
+	// Populate final button list
+	_ButtonListSize = tempButtonList.size();
+	_ButtonList = new InputButton*[_ButtonListSize];
+	for (size_t i = 0; i < _ButtonListSize; i++) _ButtonList[i] = tempButtonList[i];
+
+	// Populate final axis list
+	_AxisListSize = tempAxisList.size();
+	_AxisList = new InputAxis*[_AxisListSize];
+	for (size_t i = 0; i < _AxisListSize; i++) _AxisList[i] = tempAxisList[i];
+
+	// Populate final hat list
+	_HATListSize = tempHATList.size();
+	_RealHATCount = _HATListSize;
+	_HATList = new InputHAT*[_HATListSize];
+	for (size_t i = 0; i < _HATListSize; i++) _HATList[i] = tempHATList[i];
+}
+
+Joystick::~Joystick()
+{
+	for (size_t i = 0; i < _ButtonListSize; i++) delete _ButtonList[i];
+	delete[] _ButtonList;
+
+	for (size_t i = 0; i < _AxisListSize; i++) delete _AxisList[i];
+	delete[] _AxisList;
+
+	for (size_t i = 0; i < _HATListSize; i++) delete _HATList[i];
+	delete[] _HATList;
+
+	delete[] _ValueList;
+	delete[] _RawValueStates;
+	delete[] _RawButtonStates;
+}
+
+void Joystick::ReadJoystickState()
+{
+	// Read Device States
+	if (!InputInterface->GetInputState(_RawButtonStates, _RawValueStates))
+	{
+		int test = 0;
+		return;
+	}
+
+	// Update Button States
+	for (size_t i = 0; i < _RealButtonCount; i++)
+		_ButtonList[i]->SetState(&_RawButtonStates[i]);
+
+	// Update Value States
+	for (size_t i = 0; i < _ValueListSize; i++)
+		_ValueList[i]->SetState(&_RawValueStates[i]);
+
+	// Update Fake HAT States
+	for (size_t i = _RealHATCount; i < _HATListSize; i++)
+		_HATList[i]->SetState(nullptr);
+}
+
+void Joystick::AddCustomHAT(InputButton *upButton, InputButton *downButton, InputButton *rightButton, InputButton *leftButton)
+{
+	// Create a new HAT List
+	InputHAT **newList = new InputHAT*[_HATListSize + 1];
+
+	// Copy HATs to new list
+	for (size_t i = 0; i < _HATListSize; i++)
+		newList[i] = _HATList[i];
+
+	// Create the new HAT from the desired buttons
+	newList[_HATListSize] = new CustomHAT(upButton, downButton, rightButton, leftButton);
+
+	// Delete and reassign old list
+	delete[] _HATList;
+	_HATList = newList;
+
+	// Increment list size
+	_HATListSize++;
+
+}
+
+unsigned short Joystick::GetUsagePage() { return InputInterface->GetUsagePage(); }
+unsigned short Joystick::GetUsage() { return InputInterface->GetUsage(); }
+unsigned short Joystick::GetVendorID() { return InputInterface->GetVendorID(); }
+unsigned short Joystick::GetProductID() { return InputInterface->GetProductID(); }
+const wchar_t *Joystick::GetInterfaceName()
+{
+	std::wstring resultIn(InputInterface->GetInterfaceName());
+
+	if (OutputInterface)
+	{
+		std::wstring resultOut(OutputInterface->GetInterfaceName());
+		if (resultIn == resultOut)
 		{
-			delete[] ButtonStates;
-			delete[] ValueStates;
-
-			for (unsigned i = 0; i < AxisList.size(); i++)
-				delete AxisList[i];
-
-			for (unsigned i = 0; i < ButtonList.size(); i++)
-				delete ButtonList[i];
-
-			for (unsigned i = 0; i < HATList.size(); i++)
-				delete HATList[i];
+			size_t length = wcslen(resultIn.c_str()) + 1;
+			wchar_t *result = new wchar_t[length];
+			wcscpy_s(result, length, resultIn.c_str());
+			return result;
 		}
-
-		void Joystick::ReadJoystickState()
+		else
 		{
-			// Read Device States
-			DeviceInterface->ReadInputStates(ButtonStates, ValueStates);
-
-			// Update Button States
-			for (unsigned i = 0; i < _RealButtonCount; i++)
-				ButtonList[i]->SetState(&ButtonStates[i]);
-
-			// Update Value States
-			for (unsigned i = 0; i < _ValueCount; i++)
-				(this->*_SetValueFunctions[i].Function)(_SetValueFunctions[i].Index, &ValueStates[i]);
-
-			// Update Fake HAT States
-			for (unsigned i = _RealHATCount; i < HATList.size(); i++)
-				HATList[i]->SetState(nullptr);
+			std::wstring finalResult = resultIn + L"/" + resultOut;
+			size_t length = wcslen(finalResult.c_str()) + 1;
+			wchar_t *result = new wchar_t[length];
+			wcscpy_s(result, length, finalResult.c_str());
+			return result;
 		}
-
-		void Joystick::AddCustomHAT(InputButton *upButton, InputButton *downButton, InputButton *rightButton, InputButton *leftButton)
-		{
-			HATList.push_back(new CustomHAT(upButton, downButton, rightButton, leftButton));
-		}
-
-		void Joystick::GetInterfaceName(char *str) { DeviceInterface->GetInterfaceName(str); }
-		void Joystick::_SetHatState(unsigned index, void *state) { HATList[index]->SetState(state); }
-		void Joystick::_SetAxisState(unsigned index, void *state) { AxisList[index]->SetState(state); }
-
-		unsigned short Joystick::GetUsagePage() { return UsagePage; }
-		unsigned short Joystick::GetUsage() { return Usage; }
-		unsigned short Joystick::GetVendorID() { return VendorID; }
-		unsigned short Joystick::GetProductID() { return ProductID; }
-		void Joystick::GetVendorName(wchar_t *str) { wcscpy_s(str, 126, VendorName); }
-		void Joystick::GetProductName(wchar_t *str) { wcscpy_s(str, 126, ProductName); }
-		void Joystick::GetSerialNumber(wchar_t *str) { wcscpy_s(str, 126, SerialNumber); }
 
 	}
+	else
+	{
+		size_t length = wcslen(resultIn.c_str()) + 1;
+		wchar_t *result = new wchar_t[length];
+		wcscpy_s(result, length, resultIn.c_str());
+		return result;
+	}
 }
+const wchar_t *Joystick::GetVendorName() { return InputInterface->GetVendorName(); }
+const wchar_t *Joystick::GetProductName() { return InputInterface->GetProductName(); }
+
+InputButton *Joystick::GetButton(unsigned index)
+{
+	if (index >= _ButtonListSize) return nullptr;
+	return _ButtonList[index];
+}
+
+InputAxis *Joystick::GetAxis(unsigned index)
+{
+	if (index >= _AxisListSize) return nullptr;
+	return _AxisList[index];
+}
+
+InputHAT *Joystick::GetHAT(unsigned index)
+{
+	if (index >= _HATListSize) return nullptr;
+	return _HATList[index];
+}
+
+unsigned Joystick::GetButtonCount() { return (unsigned)_ButtonListSize; }
+unsigned Joystick::GetAxisCount() { return (unsigned)_AxisListSize; }
+unsigned Joystick::GetHATCount() { return (unsigned)_HATListSize; }
+
+}}

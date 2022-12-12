@@ -1,70 +1,67 @@
 #pragma once
-#include "IInputDevice.h"
-#include <vector>
 
-namespace TChapman500
+namespace TChapman500 {
+namespace Input {
+
+class IInput;
+class IOutput;
+
+class InputValue;
+class InputAxis;
+class InputButton;
+class InputHAT;
+
+class Joystick
 {
-	namespace JoystickAPI
-	{
-		class IInputDevice;
+public:
+	Joystick(IInput *inputInterface, IOutput *outputInterface);
+	virtual ~Joystick();
 
-		class InputAxis;
-		class InputButton;
-		class InputHAT;
+	virtual void ReadJoystickState();
+	void AddCustomHAT(InputButton *upButton, InputButton *downButton, InputButton *rightButton, InputButton *leftButton);
 
-		class Joystick
-		{
-		public:
-			Joystick(IInputDevice *devInterface);
-			virtual ~Joystick();
+	unsigned short GetUsagePage();
+	unsigned short GetUsage();
+	unsigned short GetVendorID();
+	unsigned short GetProductID();
 
-			virtual void ReadJoystickState();
-			void AddCustomHAT(InputButton *upButton, InputButton *downButton, InputButton *rightButton, InputButton *leftButton);
-			void GetInterfaceName(char *str);
+	const wchar_t *GetInterfaceName();
+	const wchar_t *GetVendorName();
+	const wchar_t *GetProductName();
 
-			unsigned short GetUsagePage();
-			unsigned short GetUsage();
-			unsigned short GetVendorID();
-			unsigned short GetProductID();
+	InputButton *GetButton(unsigned index);
+	InputAxis *GetAxis(unsigned index);
+	InputHAT *GetHAT(unsigned index);
 
-			void GetVendorName(wchar_t *str);
-			void GetProductName(wchar_t *str);
-			void GetSerialNumber(wchar_t *str);
+	unsigned GetButtonCount();
+	unsigned GetAxisCount();
+	unsigned GetHATCount();
+	
+private:
+	// Input and output interfaces
+	IInput* InputInterface;
+	IOutput* OutputInterface;
 
+	// All real values on the device
+	InputValue **_ValueList;
+	size_t _ValueListSize;
 
-			std::vector<InputAxis *> AxisList;
-			std::vector<InputButton *> ButtonList;
-			std::vector<InputHAT *> HATList;
-			
-			std::vector<valueProperties> ValuePropertyList;
-		private:
-			unsigned _ValueCount;
-			unsigned _RealButtonCount;	// Number of buttons on the device
-			unsigned _RealHATCount = 0;	// Number of HAT switches on the device
+	// All axes on the device
+	InputAxis **_AxisList;
+	size_t _AxisListSize;
 
-			IInputDevice *DeviceInterface;
+	// All buttons on the device
+	InputButton **_ButtonList;
+	size_t _ButtonListSize;
+	size_t _RealButtonCount;
 
-			void _SetHatState(unsigned index, void *state);
-			void _SetAxisState(unsigned index, void *state);
+	// All HATs on the device
+	InputHAT **_HATList;
+	size_t _HATListSize;
+	size_t _RealHATCount;
 
-			struct valueStateFunctions
-			{
-				unsigned Index;
-				void (Joystick:: *Function)(unsigned, void *);
-			};
-			std::vector<valueStateFunctions> _SetValueFunctions;
+	unsigned *_RawValueStates;
+	bool *_RawButtonStates;
+};
 
-			valueState *ValueStates;
-			bool *ButtonStates;
-
-			unsigned short UsagePage;
-			unsigned short Usage;
-			unsigned short VendorID;
-			unsigned short ProductID;
-
-			wchar_t VendorName[126];
-			wchar_t ProductName[126];
-			wchar_t SerialNumber[126];
-		};
-	}
-}
+}}

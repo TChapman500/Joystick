@@ -1,42 +1,50 @@
 #pragma once
 #include "IInputSystem.h"
-#include <vector>
 #include <dinput.h>
 
-namespace TChapman500
+namespace TChapman500 {
+namespace Input {
+
+class Joystick;
+class IInput;
+class IOutput;
+
+namespace Windows {
+
+class XInput;
+class DirectInput;
+class HID;
+
+class WinInputSystem : public IInputSystem
 {
-	namespace JoystickAPI
-	{
-		class Joystick;
-		class XInputDevice;
-		class DirectInputDevice;
-
-		class WinInputSystem : public IInputSystem
-		{
-		public:
-			WinInputSystem();
-			~WinInputSystem();
+public:
+	WinInputSystem();
+	~WinInputSystem();
 
 
-			virtual void UpdateJoystickStates() override;
-			virtual unsigned GetJoystickCount() override;
-			virtual Joystick *GetJoystick(unsigned index) override;
-		private:
-			unsigned XInputCount = 0;
-			unsigned RAWInputCount = 0;
-			unsigned DirectInputCount = 0;
+	virtual void UpdateJoystickStates() override;
+	virtual unsigned GetJoystickCount() override;
+	virtual Joystick *GetJoystick(unsigned index) override;
 
-			
+	// Call these in the message loop.
+	LRESULT OnInputDeviceChanged(WPARAM wParam, LPARAM lParam);
+	LRESULT OnInput(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMouseMove(WPARAM wParam, LPARAM lParam);
 
 
-			std::vector<XInputDevice *> XInputDeviceList;			// Max of 4 entries
-			std::vector<DirectInputDevice *> DirectInputDeviceList;		// Variable number of entries
-			std::vector<Joystick *> JoystickList;		// All devices found
 
-			IDirectInput8A *DirectInput;
-			static BOOL DIEnumDevicesCallback(LPCDIDEVICEINSTANCEA lpddi, LPVOID pvRef);
+private:
+	IInput **_InputInterfaces;
+	size_t _InputInterfaceSize;
 
-		};
-	}
-}
+	IOutput **_OutputInterfaces;
+	size_t _OutputInterfaceSize;
+
+	Joystick **_JoystickList;
+	size_t _JoystickListSize;
+
+	IDirectInput8A *DirectInput = nullptr;
+};
+
+}}}
 

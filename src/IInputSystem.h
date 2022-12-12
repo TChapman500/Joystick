@@ -1,25 +1,23 @@
 #pragma once
 
-namespace TChapman500
+namespace TChapman500 {
+namespace Input {
+
+class Joystick;
+class Keyboard;
+class Mouse;
+
+class IInputSystem
 {
-	namespace JoystickAPI
-	{
-		class Joystick;
-		class Keyboard;
-		class Mouse;
+public:
+	IInputSystem();
+	virtual ~IInputSystem();
 
-		class IInputSystem
-		{
-		public:
-			IInputSystem();
-			virtual ~IInputSystem();
+	virtual void UpdateJoystickStates() = 0;
+	virtual unsigned GetJoystickCount() = 0;
+	virtual Joystick *GetJoystick(unsigned index) = 0;
+};
 
-			virtual void UpdateJoystickStates() = 0;
-			virtual unsigned GetJoystickCount() = 0;
-			virtual Joystick *GetJoystick(unsigned index) = 0;
-			
-		};
-	}
-}
+}}
 
 

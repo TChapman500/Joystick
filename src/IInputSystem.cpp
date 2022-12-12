@@ -2,7 +2,7 @@
 
 namespace TChapman500
 {
-	namespace JoystickAPI
+	namespace Input
 	{
 		IInputSystem::IInputSystem() {}
 		IInputSystem::~IInputSystem() {}

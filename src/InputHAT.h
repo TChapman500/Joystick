@@ -1,15 +1,15 @@
 #pragma once
-#include "InputControl.h"
+#include "InputValue.h"
 
 namespace TChapman500
 {
-	namespace JoystickAPI
+	namespace Input
 	{
 		class InputButton;
-		class InputHAT : public InputControl
+		class InputHAT : public InputValue
 		{
 		public:
-			enum class hatState
+			enum class hat_state
 			{
 				Up,
 				UpRight,
@@ -23,17 +23,17 @@ namespace TChapman500
 			};
 
 
-			InputHAT(unsigned short usagePage, unsigned short usage, InputButton **buttonList);
+			InputHAT(unsigned short usagePage, unsigned short usage, unsigned short bits, int min, int max, bool null, InputButton **buttonList);
 			virtual ~InputHAT();
 
 			virtual void SetState(void *state) override;
 
-			hatState HATPosition = hatState::Centered;
+			hat_state HATPosition = hat_state::Centered;
 		public:
-			InputButton *UpButton = nullptr;
-			InputButton *DownButton = nullptr;
-			InputButton *RightButton = nullptr;
-			InputButton *LeftButton = nullptr;
+			InputButton *UpButton;
+			InputButton *DownButton;
+			InputButton *RightButton;
+			InputButton *LeftButton;
 
 		};
 	}

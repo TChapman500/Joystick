@@ -3,9 +3,9 @@
 
 namespace TChapman500
 {
-	namespace JoystickAPI
+	namespace Input
 	{
-		struct valueProperties
+		struct value_properties
 		{
 			unsigned short UsagePage;
 			unsigned short Usage;
@@ -15,7 +15,7 @@ namespace TChapman500
 			int MaxValue;
 		};
 
-		struct valueState
+		struct value_state
 		{
 			int RawValue;
 			float CenterRelative;
@@ -25,10 +25,7 @@ namespace TChapman500
 		class IInputDevice
 		{
 		public:
-			IInputDevice();
-			virtual ~IInputDevice();
-
-			void GetFloatValues(int min, int max, int raw, float *center, float *end);
+			static void GetFloatValues(int min, int max, int raw, float *center, float *end);
 
 			virtual unsigned short GetUsagePage() = 0;
 			virtual unsigned short GetUsage() = 0;
@@ -39,11 +36,11 @@ namespace TChapman500
 			virtual void GetProductName(wchar_t *str) = 0;
 			virtual void GetSerialNumber(wchar_t *str) = 0;
 
-			virtual void ReadInputStates(bool *bStates, valueState *vStates) = 0;
+			virtual void ReadInputStates(bool *bStates, value_state *vStates) = 0;
 
 			virtual unsigned GetButtonCount() = 0;
 			virtual unsigned GetValueCount() = 0;
-			virtual void GetValueProperties(unsigned index, valueProperties *properties) = 0;
+			virtual void GetValueProperties(unsigned index, value_properties *properties) = 0;
 
 			virtual void GetInterfaceName(char *str) = 0;
 		};

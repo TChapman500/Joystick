@@ -2,11 +2,8 @@
 
 namespace TChapman500
 {
-	namespace JoystickAPI
+	namespace Input
 	{
-		IInputDevice::IInputDevice() {}
-		IInputDevice::~IInputDevice() {}
-
 		void IInputDevice::GetFloatValues(int min, int max, int raw, float *center, float *end)
 		{
 			// Make sure everything is relative to zero.

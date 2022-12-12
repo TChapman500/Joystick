@@ -3,9 +3,9 @@
 
 namespace TChapman500
 {
-	namespace JoystickAPI
+	namespace Input
 	{
-		CustomHAT::CustomHAT(InputButton *upButton, InputButton *downButton, InputButton *rightButton, InputButton *leftButton) : InputHAT(1, 0x39, nullptr)
+		CustomHAT::CustomHAT(InputButton *upButton, InputButton *downButton, InputButton *rightButton, InputButton *leftButton) : InputHAT(0x01, 0x39, 4, 0, 7, true, nullptr)
 		{
 			UpButton = upButton;
 			DownButton = downButton;
@@ -19,19 +19,22 @@ namespace TChapman500
 		{
 			if (UpButton->IsPressed)
 			{
-				if (RightButton->IsPressed) HATPosition = hatState::UpRight;
-				else if (LeftButton->IsPressed) HATPosition = hatState::UpLeft;
-				else HATPosition = hatState::Up;
+				if (RightButton->IsPressed) HATPosition = hat_state::UpRight;
+				else if (LeftButton->IsPressed) HATPosition = hat_state::UpLeft;
+				else HATPosition = hat_state::Up;
 			}
 			else if (DownButton->IsPressed)
 			{
-				if (RightButton->IsPressed) HATPosition = hatState::DownRight;
-				else if (LeftButton->IsPressed) HATPosition = hatState::DownLeft;
-				else HATPosition = hatState::Down;
+				if (RightButton->IsPressed) HATPosition = hat_state::DownRight;
+				else if (LeftButton->IsPressed) HATPosition = hat_state::DownLeft;
+				else HATPosition = hat_state::Down;
 			}
-			else if (RightButton->IsPressed) HATPosition = hatState::Right;
-			else if (LeftButton->IsPressed) HATPosition = hatState::Left;
-			else HATPosition = hatState::Centered;
+			else if (RightButton->IsPressed) HATPosition = hat_state::Right;
+			else if (LeftButton->IsPressed) HATPosition = hat_state::Left;
+			else HATPosition = hat_state::Centered;
+
+			// Just in case.
+			Value = (int)HATPosition;
 		}
 	}
 }

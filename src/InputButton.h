@@ -4,7 +4,7 @@
 
 namespace TChapman500
 {
-	namespace JoystickAPI
+	namespace Input
 	{
 		class InputButton : public InputControl
 		{
