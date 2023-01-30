@@ -19,19 +19,19 @@ namespace TChapman500
 		{
 			if (UpButton->IsPressed)
 			{
-				if (RightButton->IsPressed) HATPosition = hat_state::UpRight;
-				else if (LeftButton->IsPressed) HATPosition = hat_state::UpLeft;
-				else HATPosition = hat_state::Up;
+				if (RightButton->IsPressed) HATPosition = hat_position::UpRight;
+				else if (LeftButton->IsPressed) HATPosition = hat_position::UpLeft;
+				else HATPosition = hat_position::Up;
 			}
 			else if (DownButton->IsPressed)
 			{
-				if (RightButton->IsPressed) HATPosition = hat_state::DownRight;
-				else if (LeftButton->IsPressed) HATPosition = hat_state::DownLeft;
-				else HATPosition = hat_state::Down;
+				if (RightButton->IsPressed) HATPosition = hat_position::DownRight;
+				else if (LeftButton->IsPressed) HATPosition = hat_position::DownLeft;
+				else HATPosition = hat_position::Down;
 			}
-			else if (RightButton->IsPressed) HATPosition = hat_state::Right;
-			else if (LeftButton->IsPressed) HATPosition = hat_state::Left;
-			else HATPosition = hat_state::Centered;
+			else if (RightButton->IsPressed) HATPosition = hat_position::Right;
+			else if (LeftButton->IsPressed) HATPosition = hat_position::Left;
+			else HATPosition = hat_position::Centered;
 
 			// Just in case.
 			Value = (int)HATPosition;

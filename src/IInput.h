@@ -1,17 +1,8 @@
 #pragma once
+#include "input.h"
 
 namespace TChapman500 {
 namespace Input {
-
-struct value_properties
-{
-	unsigned short UsagePage;
-	unsigned short Usage;
-	unsigned short Bits;
-	bool HasNullState;
-	int MinValue;
-	int MaxValue;
-};
 
 class IInput
 {

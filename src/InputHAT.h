@@ -1,40 +1,28 @@
 #pragma once
+#include "input.h"
 #include "InputValue.h"
 
-namespace TChapman500
+namespace TChapman500 {
+namespace Input {
+
+class InputButton;
+class InputHAT : public InputValue
 {
-	namespace Input
-	{
-		class InputButton;
-		class InputHAT : public InputValue
-		{
-		public:
-			enum class hat_state
-			{
-				Up,
-				UpRight,
-				Right,
-				DownRight,
-				Down,
-				DownLeft,
-				Left,
-				UpLeft,
-				Centered
-			};
+public:
 
 
-			InputHAT(unsigned short usagePage, unsigned short usage, unsigned short bits, int min, int max, bool null, InputButton **buttonList);
-			virtual ~InputHAT();
+	InputHAT(unsigned short usagePage, unsigned short usage, unsigned short bits, int min, int max, bool null, InputButton **buttonList);
+	virtual ~InputHAT();
 
-			virtual void SetState(void *state) override;
+	virtual void SetState(void *state) override;
 
-			hat_state HATPosition = hat_state::Centered;
-		public:
-			InputButton *UpButton;
-			InputButton *DownButton;
-			InputButton *RightButton;
-			InputButton *LeftButton;
+	hat_position HATPosition = hat_position::Centered;
+public:
+	InputButton *UpButton;
+	InputButton *DownButton;
+	InputButton *RightButton;
+	InputButton *LeftButton;
 
-		};
-	}
-}
+};
+
+}}

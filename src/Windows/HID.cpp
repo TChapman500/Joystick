@@ -122,7 +122,7 @@ HID::~HID()
 unsigned HID::GetButtonCount() { return (unsigned)_ButtonStatesSize; }
 unsigned HID::GetValueCount() { return (unsigned)_ValuesSize; }
 
-#define OLD_SCHOOL_REPORT_GET
+//#define OLD_SCHOOL_REPORT_GET
 
 bool HID::GetInputState(bool *buttons, unsigned *values)
 {
@@ -140,7 +140,7 @@ bool HID::GetInputState(bool *buttons, unsigned *values)
 #ifdef OLD_SCHOOL_REPORT_GET
 	// Get pressed buttons
 	unsigned long outButtonCount = (unsigned long)_ButtonStatesSize;
-	NTSTATUS ntResult = HidP_GetUsages(HidP_Input, HID_USAGE_PAGE_BUTTON, 0, _ButtonStates, &outButtonCount, Preparsed, _Report, (unsigned)_ReportLength);
+	NTSTATUS ntResult = HidP_GetUsages(HidP_Input, HID_USAGE_PAGE_BUTTON, 0, _ButtonStates, &outButtonCount, Preparsed, _Report, (unsigned long)_ReportLength);
 	if (ntResult != HIDP_STATUS_SUCCESS) return false;
 #endif
 
@@ -154,19 +154,22 @@ bool HID::GetInputState(bool *buttons, unsigned *values)
 
 #ifndef OLD_SCHOOL_REPORT_GET
 	// This is a bit redundant of a read, but it works.
-	unsigned long outputCount = HidData.size();
-	NTSTATUS ntResult = HidP_GetData(HidP_Input, HidData.data(), &outputCount, Preparsed, _Report, _ReportLength);
+	unsigned long outputCount = (unsigned long)_DataIndicesSize;
+	NTSTATUS ntResult = HidP_GetData(HidP_Input, _HidData, &outputCount, Preparsed, _Report, (unsigned long)_ReportLength);
 	if (ntResult != HIDP_STATUS_SUCCESS)
 		return false;
 
 	// Get pressed buttons and values
-	for (size_t i = 0, d = HidData[i].DataIndex; i < outputCount; i++)
+	for (size_t i = 0; i < outputCount; i++)
 	{
+		// Get the data index for this control.
+		size_t d = _HidData[i].DataIndex;
+
 		// Data at this control index is a button.
-		if (DataIndices[d].IsButton)
-			buttons[DataIndices[d].ControlIndex] = true;
+		if (_DataIndices[d].IsButton)
+			buttons[_DataIndices[d].ControlIndex] = true;
 		// Data at this control index is a value.
-		else values[DataIndices[d].ControlIndex] = HidData[i].RawValue;
+		else values[_DataIndices[d].ControlIndex] = _HidData[i].RawValue;
 	}
 #endif
 

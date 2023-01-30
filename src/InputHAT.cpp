@@ -38,17 +38,17 @@ namespace TChapman500
 
 			// HAT Switch is Centered
 			if (Value < MinValue || Value > MaxValue)
-				HATPosition = hat_state::Centered;
+				HATPosition = hat_position::Centered;
 			// HAT Switch is Not Centered
-			else HATPosition = (hat_state)(Value - MinValue);
+			else HATPosition = (hat_position)(Value - MinValue);
 			
 			bool buttonStates[4] = { false, false, false, false };
 
 			// Check which fake buttons should be set as pressed.
-			if (HATPosition == hat_state::Up || HATPosition == hat_state::UpLeft || HATPosition == hat_state::UpRight) buttonStates[0] = true;
-			if (HATPosition == hat_state::Down || HATPosition == hat_state::DownLeft || HATPosition == hat_state::DownRight) buttonStates[1] = true;
-			if (HATPosition == hat_state::Right || HATPosition == hat_state::UpRight || HATPosition == hat_state::DownRight) buttonStates[2] = true;
-			if (HATPosition == hat_state::Left || HATPosition == hat_state::UpLeft || HATPosition == hat_state::DownLeft) buttonStates[3] = true;
+			if (HATPosition == hat_position::Up || HATPosition == hat_position::UpLeft || HATPosition == hat_position::UpRight) buttonStates[0] = true;
+			if (HATPosition == hat_position::Down || HATPosition == hat_position::DownLeft || HATPosition == hat_position::DownRight) buttonStates[1] = true;
+			if (HATPosition == hat_position::Right || HATPosition == hat_position::UpRight || HATPosition == hat_position::DownRight) buttonStates[2] = true;
+			if (HATPosition == hat_position::Left || HATPosition == hat_position::UpLeft || HATPosition == hat_position::DownLeft) buttonStates[3] = true;
 
 			// Set fake button states.
 			if (UpButton) UpButton->SetState(&buttonStates[0]);

@@ -1,4 +1,5 @@
 #pragma once
+#include "input.h"
 
 namespace TChapman500 {
 namespace Input {
@@ -18,7 +19,7 @@ public:
 	virtual ~Joystick();
 
 	virtual void ReadJoystickState();
-	void AddCustomHAT(InputButton *upButton, InputButton *downButton, InputButton *rightButton, InputButton *leftButton);
+	bool AddCustomHAT(unsigned upButton, unsigned downButton, unsigned rightButton, unsigned leftButton);
 
 	unsigned short GetUsagePage();
 	unsigned short GetUsage();
@@ -29,13 +30,24 @@ public:
 	const wchar_t *GetVendorName();
 	const wchar_t *GetProductName();
 
-	InputButton *GetButton(unsigned index);
-	InputAxis *GetAxis(unsigned index);
-	InputHAT *GetHAT(unsigned index);
 
 	unsigned GetButtonCount();
+	InputButton *GetButton(unsigned index);
+	bool GetButtonState(unsigned index);
+	bool GetButtonRisingEdge(unsigned index);
+	bool GetButtonFallingEdge(unsigned index);
+	unsigned short GetButtonUsage(unsigned index);
+
 	unsigned GetAxisCount();
+	int GetAxisValue(unsigned index);
+	InputAxis *GetAxis(unsigned index);
+	float GetAxisCenterRelative(unsigned index);
+	float GetAxisEndRelative(unsigned index);
+	bool GetAxisProperties(value_properties &properties, unsigned index);
+
 	unsigned GetHATCount();
+	InputHAT *GetHAT(unsigned index);
+	hat_position GetHATPosition(unsigned index);
 	
 private:
 	// Input and output interfaces

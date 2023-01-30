@@ -131,17 +131,29 @@ void Joystick::ReadJoystickState()
 		_HATList[i]->SetState(nullptr);
 }
 
-void Joystick::AddCustomHAT(InputButton *upButton, InputButton *downButton, InputButton *rightButton, InputButton *leftButton)
+bool Joystick::AddCustomHAT(unsigned upButton, unsigned downButton, unsigned rightButton, unsigned leftButton)
 {
+	// Invalid Parameter check.
+	if (upButton >= _RealButtonCount || downButton >= _RealButtonCount || rightButton >= _RealButtonCount || leftButton >= _RealButtonCount)
+		return false;
+	if (upButton == downButton || upButton == rightButton || upButton == leftButton || downButton == rightButton || downButton == leftButton || rightButton == leftButton)
+		return false;
+
 	// Create a new HAT List
-	InputHAT **newList = new InputHAT*[_HATListSize + 1];
+	InputHAT **newList = new(std::nothrow) InputHAT * [_HATListSize + 1];
+	if (!newList) return false;
 
 	// Copy HATs to new list
 	for (size_t i = 0; i < _HATListSize; i++)
 		newList[i] = _HATList[i];
 
 	// Create the new HAT from the desired buttons
-	newList[_HATListSize] = new CustomHAT(upButton, downButton, rightButton, leftButton);
+	newList[_HATListSize] = new(std::nothrow) CustomHAT(_ButtonList[upButton], _ButtonList[downButton], _ButtonList[rightButton], _ButtonList[leftButton]);
+	if (!newList[_HATListSize])
+	{
+		delete[] newList;
+		return false;
+	}
 
 	// Delete and reassign old list
 	delete[] _HATList;
@@ -149,7 +161,7 @@ void Joystick::AddCustomHAT(InputButton *upButton, InputButton *downButton, Inpu
 
 	// Increment list size
 	_HATListSize++;
-
+	return true;
 }
 
 unsigned short Joystick::GetUsagePage() { return InputInterface->GetUsagePage(); }
@@ -191,22 +203,83 @@ const wchar_t *Joystick::GetInterfaceName()
 const wchar_t *Joystick::GetVendorName() { return InputInterface->GetVendorName(); }
 const wchar_t *Joystick::GetProductName() { return InputInterface->GetProductName(); }
 
-InputButton *Joystick::GetButton(unsigned index)
-{
-	if (index >= _ButtonListSize) return nullptr;
-	return _ButtonList[index];
-}
-
 InputAxis *Joystick::GetAxis(unsigned index)
 {
 	if (index >= _AxisListSize) return nullptr;
 	return _AxisList[index];
 }
 
+InputButton *Joystick::GetButton(unsigned index)
+{
+	if (index >= _ButtonListSize) return nullptr;
+	return _ButtonList[index];
+}
+
 InputHAT *Joystick::GetHAT(unsigned index)
 {
 	if (index >= _HATListSize) return nullptr;
 	return _HATList[index];
+}
+
+bool Joystick::GetButtonState(unsigned index)
+{
+	if (index >= _ButtonListSize) return false;
+	return _ButtonList[index]->IsPressed;
+}
+
+bool Joystick::GetButtonRisingEdge(unsigned index)
+{
+	if (index >= _ButtonListSize) return false;
+	return _ButtonList[index]->RisingEdge;
+}
+
+bool Joystick::GetButtonFallingEdge(unsigned index)
+{
+	if (index >= _ButtonListSize) return false;
+	return _ButtonList[index]->FallingEdge;
+}
+
+unsigned short Joystick::GetButtonUsage(unsigned index)
+{
+	if (index >= _ButtonListSize) return false;
+	return _ButtonList[index]->Usage;
+}
+
+int Joystick::GetAxisValue(unsigned index)
+{
+	if (index >= _AxisListSize) return 0;
+	return _AxisList[index]->Value;
+}
+
+float Joystick::GetAxisCenterRelative(unsigned index)
+{
+	if (index >= _AxisListSize) return 0.0f;
+	return _AxisList[index]->CenterRelative;
+}
+
+float Joystick::GetAxisEndRelative(unsigned index)
+{
+	if (index >= _AxisListSize) return 0.0f;
+	return _AxisList[index]->EndRelative;
+}
+
+bool Joystick::GetAxisProperties(value_properties &properties, unsigned index)
+{
+	if (index >= _AxisListSize) return false;
+	properties.Usage = _AxisList[index]->Usage;
+	properties.UsagePage = _AxisList[index]->UsagePage;
+	properties.Bits = _AxisList[index]->Bits;
+	properties.MinValue = _AxisList[index]->MinValue;
+	properties.MaxValue = _AxisList[index]->MaxValue;
+	properties.HasNullState = _AxisList[index]->HasNullState;
+	properties.Bits = _AxisList[index]->Bits;
+	return true;
+}
+
+hat_position Joystick::GetHATPosition(unsigned index)
+{
+	if (index >= _HATListSize) return hat_position::Centered;
+	return _HATList[index]->HATPosition;
 }
 
 unsigned Joystick::GetButtonCount() { return (unsigned)_ButtonListSize; }
