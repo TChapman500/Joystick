@@ -1,5 +1,5 @@
 #pragma once
-#include "HID.h"
+#include "IInput.h"
 #include "IOutput.h"
 
 namespace TChapman500 {
@@ -41,11 +41,6 @@ public:
 private:
 	WinDevice *_DeviceInterface = nullptr;
 	RawInputDevice *_RawInputDevice = nullptr;
-
-	// Device Handle
-	LPWSTR DevicePath = nullptr;
-	HANDLE FileHandle = nullptr;
-
 };
 
 }}}

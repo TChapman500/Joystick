@@ -32,8 +32,6 @@
 #include <fstream>
 #include <string>
 
-#include "HID.h"
-
 namespace TChapman500 {
 namespace Input {
 namespace Windows {
