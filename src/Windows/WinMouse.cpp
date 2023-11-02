@@ -20,12 +20,12 @@ WinMouse::~WinMouse()
 
 unsigned WinMouse::GetButtonCount()
 {
-	return 0;
+	return 5;
 }
 
 unsigned WinMouse::GetValueCount()
 {
-	return 0;
+	return 6;
 }
 
 bool WinMouse::GetInputState(bool *buttons, unsigned *values)
@@ -38,7 +38,7 @@ bool WinMouse::GetInputState(bool *buttons, unsigned *values)
 
 bool WinMouse::GetIsConnected()
 {
-	return false;
+	return true;
 }
 
 bool WinMouse::GetValueProperties(unsigned index, value_properties *properties)
@@ -74,7 +74,12 @@ const wchar_t *WinMouse::GetProductName()
 	return nullptr;
 }
 
-const wchar_t *WinMouse::GetInterfaceName() { return L"Raw Input Mouse"; }
+const wchar_t *WinMouse::GetSerialNumber()
+{
+	return nullptr;
+}
+
+const wchar_t *WinMouse::GetInterfaceName() { return L"RawInput Mouse"; }
 
 void WinMouse::RawInputMessage(RAWMOUSE *data)
 {
@@ -113,6 +118,12 @@ void WinMouse::MouseMoveMessage(LPARAM lParam)
 {
 	_Values[0] = GET_X_LPARAM(lParam);
 	_Values[1] = GET_Y_LPARAM(lParam);
+}
+
+void WinMouse::ClearDeltas()
+{
+	_Values[2] = 0;
+	_Values[3] = 0;
 }
 
 }}}

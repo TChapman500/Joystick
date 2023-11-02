@@ -54,7 +54,7 @@ Joystick::Joystick(IInput *inputInterface, IOutput *outputInterface)
 		else
 		{
 			// Add new axis to the hidden axis list.
-			InputAxis *newAxis = new InputAxis(valueProps.UsagePage, valueProps.Usage, valueProps.Bits, valueProps.MinValue, valueProps.MaxValue, valueProps.HasNullState);
+			InputAxis *newAxis = new InputAxis(valueProps.UsagePage, valueProps.Usage, valueProps.Bits, valueProps.MinValue & 0xFFFF, valueProps.MaxValue & 0xFFFF, valueProps.HasNullState);
 			_ValueList[i] = newAxis;
 
 			// We'll use this to determine which axis to expose to the user.

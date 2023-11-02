@@ -208,4 +208,10 @@ void Keyboard::ReadKeyboardState()
 	ScrollLock = _LockStates[2] == 1;
 }
 
+InputButton *Keyboard::operator[](key_code key)
+{
+	if (key >= key_code::Unknown) return nullptr;
+	return Keys[(unsigned)key];
+}
+
 }}

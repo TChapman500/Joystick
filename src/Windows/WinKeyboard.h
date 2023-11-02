@@ -31,6 +31,7 @@ public:
 	virtual unsigned GetVersionNumber() override;
 	virtual const wchar_t *GetVendorName() override;
 	virtual const wchar_t *GetProductName() override;
+	virtual const wchar_t *GetSerialNumber() override;
 	virtual const wchar_t *GetInterfaceName() override;
 
 

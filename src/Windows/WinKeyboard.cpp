@@ -288,7 +288,7 @@ bool WinKeyboard::GetInputState(bool *buttons, unsigned *values)
 	return true;
 }
 
-bool WinKeyboard::GetIsConnected() { return false; }
+bool WinKeyboard::GetIsConnected() { return true; }
 
 bool WinKeyboard::GetValueProperties(unsigned index, value_properties *properties)
 {
@@ -323,7 +323,12 @@ const wchar_t *WinKeyboard::GetProductName()
 	return nullptr;
 }
 
-const wchar_t *WinKeyboard::GetInterfaceName() { return L"Raw Input Keyboard"; }
+const wchar_t *WinKeyboard::GetSerialNumber()
+{
+	return nullptr;
+}
+
+const wchar_t *WinKeyboard::GetInterfaceName() { return L"RawInput Keyboard"; }
 
 void WinKeyboard::RawInputMessage(RAWKEYBOARD *data)
 {

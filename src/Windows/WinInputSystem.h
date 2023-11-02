@@ -1,6 +1,7 @@
 #pragma once
 #include "IInputSystem.h"
 #include <dinput.h>
+#include <vector>
 
 namespace TChapman500 {
 namespace Input {
@@ -13,17 +14,31 @@ namespace Windows {
 
 class XInput;
 class DirectInput;
+class RawInputDevice;
 class HID;
 class WinKeyboard;
 class WinMouse;
+class WinDevice;
+
 
 class WinInputSystem : public IInputSystem
 {
 public:
+	WNDCLASSEXW test;
+
+	struct init_params
+	{
+		bool UseKeyboards;
+		bool UseMice;
+		HWND MainHWnd;
+		WNDPROC UseProc;
+	};
+
 	WinInputSystem();
+	WinInputSystem(HWND mainHWnd);
 	~WinInputSystem();
 
-
+	void ResetDeviceStates();
 	virtual void UpdateJoystickStates() override;
 	virtual unsigned GetJoystickCount() override;
 	virtual Joystick *GetJoystick(unsigned index) override;
@@ -59,26 +74,54 @@ public:
 	virtual bool GetNumLock() override;
 	virtual bool GetScrollLock() override;
 
-	// Call this in the message loop.
-	bool MessageProc(UINT message, WPARAM wParam, LPARAM lParam);
+	// Call this in the window procedure.
+	bool WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 
 private:
-	IInput **_InputInterfaces;
-	size_t _InputInterfaceSize;
+	static LRESULT CALLBACK _WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	IOutput **_OutputInterfaces;
-	size_t _OutputInterfaceSize;
 
-	Joystick **_JoystickList;
-	size_t _JoystickListSize;
+	bool _JoyMessageProc(UINT message, WPARAM wParam, LPARAM lParam);
+	bool _KeyMouseMessageProc(UINT message, WPARAM wParam, LPARAM lParam);
+	bool _DevConnectProc(UINT message, WPARAM wParam, LPARAM lParam);
+	void _ProcessRiJoysticks(RAWINPUT *rawInput);
+
+	typedef bool (WinInputSystem::*INPUTPROC)(UINT, WPARAM, LPARAM);
+	INPUTPROC _InputProc;
+
+	void _PopulateXInputDevices();
+	void _PopulateRawInputDevices();
+	void _PopulateRawInputDevices(HWND hWnd);
+
+	void _SyncDevices();
+
+	std::vector<WinDevice *> _UnsynchedRawInputDevices;
+	std::vector<WinDevice *> _WinRawInputDevices;
+	std::vector<RawInputDevice *> _UnsynchedRawInputInterfaces;
+	std::vector<RawInputDevice *> _RawInputInterfaces;
+
+	std::vector<WinDevice *> _UnsynchedXInputDevices;
+	std::vector<WinDevice *> _WinXInputDevices;
+	std::vector<XInput *> _UnsynchedXInputInterfaces;
+	std::vector<XInput *> _XInputInterfaces;
+
+	//std::vector<OutputHID *> _OutHIDInterfaces;
+	std::vector<DirectInput *> _DirectInputInterfaces;
+
+	std::vector<IInput *> _InputInterfaces;
+	std::vector<IOutput *> _OutputInterfaces;
+	std::vector<Joystick *> _Joysticks;
 
 	IDirectInput8A *DirectInput = nullptr;
 
-	WinKeyboard *_IKeyboard;
-	WinMouse *_IMouse;
+	IInput *_IKeyboard = nullptr;
+	IInput *_IMouse = nullptr;
 
-	Keyboard *_Keyboard;
-	Mouse *_Mouse;
+	Keyboard *_Keyboard = nullptr;
+	Mouse *_Mouse = nullptr;
+	
+	HWND _HWnd = nullptr;
+	HDEVNOTIFY _HDevNotify = nullptr;
 };
 
 }}}

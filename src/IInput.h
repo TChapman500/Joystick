@@ -28,6 +28,7 @@ public:
 	virtual unsigned GetVersionNumber() = 0;
 	virtual const wchar_t *GetVendorName() = 0;
 	virtual const wchar_t *GetProductName() = 0;
+	virtual const wchar_t *GetSerialNumber() = 0;
 	virtual const wchar_t *GetInterfaceName() = 0;
 };
 

@@ -1,5 +1,4 @@
 #include "InputAxis.h"
-#include "IInputDevice.h"
 
 namespace TChapman500
 {

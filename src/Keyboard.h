@@ -24,6 +24,8 @@ public:
 	
 	void ReadKeyboardState();
 
+	InputButton *operator[] (key_code key);
+
 private:
 	IInput *InputInterface;
 	InputButton **Keys;

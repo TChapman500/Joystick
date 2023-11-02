@@ -30,12 +30,15 @@ public:
 	virtual unsigned GetVersionNumber() override;
 	virtual const wchar_t *GetVendorName() override;
 	virtual const wchar_t *GetProductName() override;
+	virtual const wchar_t *GetSerialNumber() override;
 	virtual const wchar_t *GetInterfaceName() override;
 
 
 	// Call these functions in the window proc function
 	void RawInputMessage(RAWMOUSE *data);
 	void MouseMoveMessage(LPARAM lParam);
+
+	void ClearDeltas();
 
 private:
 	bool *_Buttons;
