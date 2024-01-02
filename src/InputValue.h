@@ -16,6 +16,7 @@ public:
 	int MinValue;
 	int MaxValue;
 	int Value;
+	int PrevValue;
 	bool HasNullState;
 
 

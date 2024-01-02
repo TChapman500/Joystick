@@ -10,13 +10,14 @@ namespace TChapman500
 			EndRelative = 0.0f;
 		}
 
-		InputAxis::~InputAxis()
-		{
-		}
+		InputAxis::~InputAxis() {}
 
 		void InputAxis::SetState(void *state)
 		{
 			InputValue::SetState(state);
+
+			float prevCenterRelative = CenterRelative;
+			float prevEndRelative = EndRelative;
 
 			// Make sure everything is relative to zero.
 			int absMax = MaxValue - MinValue;
@@ -41,6 +42,8 @@ namespace TChapman500
 				else CenterRelative = ((float)absRaw / (float)halfValue) - 1.0f;
 			}
 
+			CenterRelativeDelta = CenterRelative - prevCenterRelative;
+			EndRelativeDelta = EndRelative - prevEndRelative;
 		}
 	}
 }

@@ -21,6 +21,7 @@ struct value_state
 
 enum class hat_position
 {
+	None = -1,
 	Up,
 	UpRight,
 	Right,

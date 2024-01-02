@@ -9,10 +9,15 @@ InputValue::InputValue(unsigned short usagePage, unsigned short usage, unsigned 
 	MaxValue = max;
 	HasNullState = null;
 	Value = 0;
+	PrevValue = 0;
 }
 
 InputValue::~InputValue() {}
 
-void InputValue::SetState(void *state) { Value = *(int *)state; }
+void InputValue::SetState(void *state)
+{
+	PrevValue = Value;
+	Value = *(int *)state;
+}
 
 }}

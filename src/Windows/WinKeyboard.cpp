@@ -255,8 +255,8 @@ WinKeyboard::WinKeyboard()
 		E1ScanCodes[0x1D] = key_code::Pause;
 	}
 
-	_Keys = new bool[(unsigned)key_code::Unknown];
-	for (unsigned i = 0; i < (unsigned)key_code::Unknown; i++) _Keys[i] = false;
+	_Keys = new bool[(unsigned)key_code::Unknown * 2];
+	for (unsigned i = 0; i < (unsigned)key_code::Unknown * 2; i++) _Keys[i] = false;
 
 	_Values = new unsigned[3];
 	_Values[0] = 0;
@@ -275,15 +275,13 @@ unsigned WinKeyboard::GetButtonCount()
 	return (unsigned)key_code::Unknown;
 }
 
-unsigned WinKeyboard::GetValueCount()
-{
-	return 3;
-}
+unsigned WinKeyboard::GetValueCount() { return 3; }
 
 bool WinKeyboard::GetInputState(bool *buttons, unsigned *values)
 {
 	if (!buttons || !values) return false;
-	memcpy(buttons, _Keys, (size_t)key_code::Unknown);
+	memcpy(buttons, _Keys, (size_t)key_code::Unknown * 2);
+	memset(_Keys + (size_t)key_code::Unknown, 0, (size_t)key_code::Unknown);
 	memcpy(values, _Values, 12);
 	return true;
 }
@@ -344,8 +342,50 @@ void WinKeyboard::RawInputMessage(RAWKEYBOARD *data)
 	else key = ScanCodes[data->MakeCode];
 
 	// Process make flag
-	if ((data->Flags & RI_KEY_MAKE) == RI_KEY_MAKE)
+	if ((data->Flags & RI_KEY_BREAK) == RI_KEY_BREAK)
 	{
+		_Keys[(unsigned)key] = false;
+		_Keys[(unsigned)key + (unsigned)key_code::Unknown] = false;
+
+		switch (key)
+		{
+		case key_code::LeftAlt:
+		case key_code::RightAlt:
+			if (!_Keys[(unsigned)key_code::LeftAlt] && !_Keys[(unsigned)key_code::RightAlt])
+			{
+				_Keys[(unsigned)key_code::Alt] = false;
+				_Keys[(unsigned)key_code::Alt + (unsigned)key_code::Unknown] = false;
+			}
+			break;
+		case key_code::LeftShift:
+		case key_code::RightShift:
+			if (!_Keys[(unsigned)key_code::LeftShift] && !_Keys[(unsigned)key_code::RightShift])
+			{
+				_Keys[(unsigned)key_code::Shift] = false;
+				_Keys[(unsigned)key_code::Shift + (unsigned)key_code::Unknown] = false;
+			}
+			break;
+		case key_code::LeftControl:
+		case key_code::RightControl:
+			if (!_Keys[(unsigned)key_code::LeftControl] && !_Keys[(unsigned)key_code::RightControl])
+			{
+				_Keys[(unsigned)key_code::Control] = false;
+				_Keys[(unsigned)key_code::Control + (unsigned)key_code::Unknown] = false;
+			}
+			break;
+		case key_code::LeftSuper:
+		case key_code::RightSuper:
+			if (!_Keys[(unsigned)key_code::LeftSuper] && !_Keys[(unsigned)key_code::RightSuper])
+			{
+				_Keys[(unsigned)key_code::Super] = false;
+				_Keys[(unsigned)key_code::Super + (unsigned)key_code::Unknown] = false;
+			}
+			break;
+		}
+	}
+	else
+	{
+		_Keys[(unsigned)key + (unsigned)key_code::Unknown] = true;
 		_Keys[(unsigned)key] = true;
 
 		short tKey;
@@ -363,12 +403,28 @@ void WinKeyboard::RawInputMessage(RAWKEYBOARD *data)
 			tKey = GetKeyState(VK_SCROLL);
 			_Values[2] = tKey & 1;
 			break;
+		case key_code::LeftAlt:
+		case key_code::RightAlt:
+			_Keys[(unsigned)key_code::Alt] = true;
+			_Keys[(unsigned)key_code::Alt + (unsigned)key_code::Unknown] = true;
+			break;
+		case key_code::LeftShift:
+		case key_code::RightShift:
+			_Keys[(unsigned)key_code::Shift] = true;
+			_Keys[(unsigned)key_code::Shift + (unsigned)key_code::Unknown] = true;
+			break;
+		case key_code::LeftControl:
+		case key_code::RightControl:
+			_Keys[(unsigned)key_code::Control] = true;
+			_Keys[(unsigned)key_code::Control + (unsigned)key_code::Unknown] = true;
+			break;
+		case key_code::LeftSuper:
+		case key_code::RightSuper:
+			_Keys[(unsigned)key_code::Super] = true;
+			_Keys[(unsigned)key_code::Super + (unsigned)key_code::Unknown] = true;
+			break;
 		}
 	}
-	else _Keys[(unsigned)key] = false;
-
-
-
 }
 
 }}}

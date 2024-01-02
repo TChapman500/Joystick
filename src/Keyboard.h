@@ -5,17 +5,18 @@ namespace TChapman500 {
 namespace Input {
 
 class IInput;
-class InputButton;
+class InputKey;
 class Keyboard
 {
 public:
 	Keyboard(IInput *inputInterface);
 	~Keyboard();
 
-	InputButton *GetKey(key_code key);
+	InputKey *GetKey(key_code key);
 	bool GetKeyState(key_code key);
 	bool GetKeyRisingEdge(key_code key);
 	bool GetKeyFallingEdge(key_code key);
+	bool GetKeyRepeatPress(key_code key);
 
 	bool GetScrollLock();
 	bool GetCapsLock();
@@ -24,11 +25,11 @@ public:
 	
 	void ReadKeyboardState();
 
-	InputButton *operator[] (key_code key);
+	InputKey *operator[] (key_code key);
 
 private:
 	IInput *InputInterface;
-	InputButton **Keys;
+	InputKey **Keys;
 	bool CapsLock, NumLock, ScrollLock;
 
 	bool *_KeyStates;

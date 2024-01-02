@@ -17,7 +17,6 @@
 
 #include <Windows.h>
 #include <windowsx.h>
-#include <dinputd.h>
 #include <hidsdi.h>
 #include <hidpi.h>
 #include <setupapi.h>
@@ -173,10 +172,10 @@ void WinInputSystem::_PopulateRawInputDevices(HWND hWnd)
 
 		// Register Keyboard, Mouse and Game Controllers for Raw Input Messages
 		RAWINPUTDEVICE devices[4] = {
-			{ 1, 2, NULL, nullptr },
+			{ 1, 2, NULL, hWnd },
 			{ 1, 4, RIDEV_DEVNOTIFY, hWnd },
 			{ 1, 5, RIDEV_DEVNOTIFY, hWnd },
-			{ 1, 6, NULL, nullptr } };
+			{ 1, 6, NULL, hWnd } };
 		RegisterRawInputDevices(devices, 4, sizeof(RAWINPUTDEVICE));
 
 		DEV_BROADCAST_DEVICEINTERFACE_W db =

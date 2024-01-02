@@ -40,7 +40,8 @@ Joystick::Joystick(IInput *inputInterface, IOutput *outputInterface)
 		if (valueProps.UsagePage == 0x01 && valueProps.Usage == 0x39)
 		{
 			InputButton *buttonList[4];
-			InputHAT *newHat = new InputHAT(valueProps.UsagePage, valueProps.Usage, valueProps.Bits, valueProps.MinValue, valueProps.MaxValue, valueProps.HasNullState, buttonList);
+			HATAxis *axisList[2];
+			InputHAT *newHat = new InputHAT(valueProps.UsagePage, valueProps.Usage, valueProps.Bits, valueProps.MinValue, valueProps.MaxValue, valueProps.HasNullState, buttonList, axisList);
 			_ValueList[i] = newHat;
 
 			// Get the HAT Switch and it's buttons.
@@ -49,6 +50,10 @@ Joystick::Joystick(IInput *inputInterface, IOutput *outputInterface)
 			tempButtonList.push_back(buttonList[1]);
 			tempButtonList.push_back(buttonList[2]);
 			tempButtonList.push_back(buttonList[3]);
+
+			tempAxisList.push_back((InputAxis *)axisList[0]);
+			tempAxisList.push_back((InputAxis *)axisList[1]);
+
 		}
 		// This is an axis
 		else
@@ -279,7 +284,7 @@ bool Joystick::GetAxisProperties(value_properties &properties, unsigned index)
 hat_position Joystick::GetHATPosition(unsigned index)
 {
 	if (index >= _HATListSize) return hat_position::Centered;
-	return _HATList[index]->HATPosition;
+	return _HATList[index]->Position;
 }
 
 unsigned Joystick::GetButtonCount() { return (unsigned)_ButtonListSize; }

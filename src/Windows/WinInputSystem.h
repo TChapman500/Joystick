@@ -1,6 +1,6 @@
 #pragma once
 #include "IInputSystem.h"
-#include <dinput.h>
+#include <Windows.h>
 #include <vector>
 
 namespace TChapman500 {
@@ -13,7 +13,6 @@ class IOutput;
 namespace Windows {
 
 class XInput;
-class DirectInput;
 class RawInputDevice;
 class HID;
 class WinKeyboard;
@@ -105,14 +104,9 @@ private:
 	std::vector<XInput *> _UnsynchedXInputInterfaces;
 	std::vector<XInput *> _XInputInterfaces;
 
-	//std::vector<OutputHID *> _OutHIDInterfaces;
-	std::vector<DirectInput *> _DirectInputInterfaces;
-
 	std::vector<IInput *> _InputInterfaces;
 	std::vector<IOutput *> _OutputInterfaces;
 	std::vector<Joystick *> _Joysticks;
-
-	IDirectInput8A *DirectInput = nullptr;
 
 	IInput *_IKeyboard = nullptr;
 	IInput *_IMouse = nullptr;
